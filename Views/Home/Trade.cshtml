@@ -1,0 +1,177 @@
+﻿@model TradeViewModel
+@{
+    ViewData["Title"] = $"Trade {Model.Token.Symbol}";
+    var hasLockedAmount = Model.Token.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Sell).Sum(u => u.Amount) != Model.Token.UserBalance;
+}
+
+<div class="lg:grid lg:grid-cols-12 lg:gap-6">
+    <div class="lg:col-start-2 lg:col-end-6">
+        <div class="flex items-center bg-gray-100 border border-gray-300 rounded-md px-4 py-4 mb-4">
+            <svg role="img" class="h-6 w-6 flex-shrink-0">
+                <use xlink:href="/img/sprite.svg#coin-@(Model.Token.Symbol)"></use>
+            </svg>
+            <div class="flex flex-col ml-3">
+                <strong class="font-bold text-lg">@(Model.Token.Name)</strong>
+                <small class=" inline-block font-medium text-xs text-gray-400 mt-1">$@(Model.Token.Price.SplitNumber3Digits())</small>
+            </div>
+            <div class="text-right ml-auto">
+                <div class="">
+                    @if(hasLockedAmount)
+                    {
+                        <span>@((Model.Token.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Sell).Sum(u => u.Amount)).SplitNumber3Digits()) /</span>
+                    }
+                    <span>@(Model.Token.UserBalance.SplitNumber3Digits())</span>
+                    <span>@(Model.Token.Symbol)</span>
+                </div>
+                <div class="text-gray-400">
+                    @if(hasLockedAmount)
+                    {
+                        <small class="text-xs">$@(((Model.Token.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Sell).Sum(u => u.Amount)) * Model.Token.Price).SplitNumber3Digits()) /</small>
+                    }
+                    <small class="text-xs">$@((Model.Token.UserBalance * Model.Token.Price).SplitNumber3Digits())</small>
+                </div>
+            </div>
+        </div>
+        <div class="border border-gray-300 rounded-md px-4 py-4 mb-5">
+            <form method="post">
+                <div class="flex bg-gray-100 border rounded-md text-center p-2 mb-3">
+                    <div class="w-1/2">
+                        <input class="peer hidden" type="radio" name="trade-side-radio" id="side-radio-buy" value="@(TradeSide.Buy)" checked>
+                        <label for="side-radio-buy" class="block transition-colors cursor-pointer peer-checked:cursor-default peer-checked:bg-blue-200 text-gray-500 peer-checked:text-black rounded-md py-1">Buy</label>
+                    </div>
+                    <div class="w-1/2">
+                        <input class="peer hidden" type="radio" name="trade-side-radio" id="side-radio-sell" value="@(TradeSide.Sell)">
+                        <label for="side-radio-sell" class="block transition-colors cursor-pointer peer-checked:cursor-default peer-checked:bg-blue-200 text-gray-500 peer-checked:text-black rounded-md py-1">Sell</label>
+                    </div>
+                    <input type="hidden" id="trade-side-input" asp-for="Trade.Side" class="block" value="@(TradeSide.Buy)">
+                </div>
+                <div class="mb-3">
+                    <label for="amount-input" class="text-sm text-gray-600 cursor-pointer mb-1">Amount</label>
+                    <input type="text" inputmode="decimal" id="amount-input-mask" autocomplete="off" class="peer block bg-white w-full border rounded-md px-3 py-2" required />
+                    <input type="hidden" asp-for="Trade.Amount" id="amount-input" required />
+                </div>
+                <div class="mb-3">
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="price-input" class="text-sm text-gray-600 cursor-pointer">Price</label>
+                        <small class="text-xs text-gray-400">Avlb. @((Model.Usdt.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Buy).Sum(u => u.Amount * u.Price)).SplitNumber3Digits()) USDT</small>
+                    </div>
+                    <input type="text" inputmode="decimal" id="price-input-mask" autocomplete="off" class="peer block bg-white w-full border rounded-md px-3 py-2" required />
+                    <input type="hidden" asp-for="Trade.Price" id="price-input" required />
+                </div>
+                @if(ViewBag.Errors != null)
+                {
+                    <div class="bg-rose-200/40 text-rose-700 rounded-md p-3 my-3">
+                        @ViewBag.Errors
+                    </div>
+                }
+                <button id="submit-btn" type="submit" class="block w-full rounded-md bg-green-600 hover:brightness-95 active:brightness-90 text-white py-2"><span id="submit-btn-action">Buy</span> <span id="submit-btn-extra"></span></button>
+            </form>
+        </div>
+    </div>
+    <div class="lg:col-start-6 lg:col-end-12">
+        <div class="border border-gray-300 rounded-md">
+            @* OPEN ORDERS *@
+            <div>
+                @foreach (var trade in Model.OpenTrades)
+                {
+                    <div class="flex items-center border-t p-4">
+                        <svg role="img" class="h-6 w-6 flex-shrink-0 mr-4">
+                            <use xlink:href="/img/sprite.svg#coin-@(trade.Coin.Symbol)"></use>
+                        </svg>
+                        <div class="flex flex-col">
+                            <span>@(trade.Side.ToString()) @(trade.Coin.Symbol)</span>
+                            @* // CancelTrade/asp-route-id{tradeId} *@
+                            <a asp-action="CancelTrade" asp-route-id="@(trade.TradeId)" class="cancel-trade-btn text-xs text-red-600 hover:underline mt-1">Cancel Order</a>
+                        </div>
+                        <div class="text-right text-sm ml-auto">
+                            <div class="mb-1">
+                                <span class="text-gray-400">Amount:</span>
+                                <span>@(trade.Amount)</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Price:</span>
+                                <span>@(trade.Price)</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/imask.min.js"></script>
+    <script>
+        $(document).on('click', '[name="trade-side-radio"]', function() {
+            var value = $(this).attr('value');
+            $('#trade-side-input').val(value);
+            $('#submit-btn-action').text(value);
+            if(value === '@(TradeSide.Buy)') {
+                $('#submit-btn').removeClass('bg-red-600').addClass('bg-green-600');
+            } else if(value === '@(TradeSide.Sell)') {
+                $('#submit-btn').addClass('bg-red-600').removeClass('bg-green-600');
+            }
+        });
+
+        const priceMask = new IMask(document.getElementById('price-input-mask'), {
+            mask: Number,
+            min: 0,
+            thousandsSeparator: ',',
+            radix: '.',
+            signed: false,
+            scale: 2,
+        });
+
+        const amountMask = new IMask(document.getElementById('amount-input-mask'), {
+            mask: Number,
+            min: 0,
+            thousandsSeparator: ',',
+            radix: '.',
+            signed: false,
+            scale: 10,
+        });
+
+        priceMask.on("complete", function () {
+            $('#price-input').val(priceMask.unmaskedValue);
+            submitButton();
+        });
+
+        amountMask.on("complete", function () {
+            $('#amount-input').val(amountMask.unmaskedValue);
+            submitButton();
+        });
+
+        function submitButton() {
+            //submit-btn-extra
+            if(amountMask.unmaskedValue != '' && priceMask.unmaskedValue != '') {
+                $('#submit-btn-extra').text('$' + (amountMask.unmaskedValue * priceMask.unmaskedValue).toFixed(2) + ' @(Model.Token.Symbol)');
+            } else {
+                $('#submit-btn-extra').text('');
+            }
+        }
+    </script>
+}
+
+@if (ViewBag.Success != null)
+{
+    <h3>
+        Success
+    </h3>
+}
+
+@foreach (var trade in Model.OpenTrades)
+{
+    <div>
+        @(trade.Side.ToString()) - @(trade.Coin.Symbol) - @(trade.Price) - @(trade.Amount)
+    </div>
+}
+
+<div>-------------------------------------</div>
+
+@foreach (var trade in Model.SuccessTrade)
+{
+    <div>
+        @(trade.Side.ToString()) - @(trade.Coin.Symbol) - @(trade.Price) - @(trade.Amount)
+    </div>
+}

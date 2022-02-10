@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Your friendly trading sandbox";
+}
+@* @(User.Identity.IsAuthenticated) *@
+<div class="lg:flex lg:items-center lg:min-h-full">
+    <div class="flex items-center justify-center bg-green-100 rounded-3xl p-5 lg:p-8">
+        <img src="/img/illustration.svg" class="max-h-24 w-auto lg:max-h-full lg:max-w-full drop-shadow-2xl" alt="Illustration">
+    </div>
+    <div class="flex flex-col lg:px-14">
+        <h2 class="text-2xl font-black mt-10">Welcome</h2>
+        <p class="text-sm text-gray-500 leading-6 mt-1">
+            Wanna start trading but lack experience and are afraid of losing your life's savings? Start paper-trading with free virtual money.
+        </p>
+        <form method="post" class="flex flex-col bg-gray-300/25 rounded-md p-6 my-10">
+            <h2 class="text-2xl font-black">Login/Register</h2>
+            <p class="text-sm text-gray-500 leading-6 mt-1 mb-2">
+                Log into your account, or create a new account if you don't already have one.
+            </p>
+            <div class="mb-2">
+                <label for="username-input" class="text-sm text-gray-600 cursor-pointer mb-1">Username</label>
+                <input type="text" name="name" id="username-input" autocomplete="username" autocapitalize="off" class="peer block bg-white w-full border rounded-md px-3 py-2" required />
+            </div>
+            <div class="mb-3">
+                <label for="password-input" class="text-sm text-gray-600 cursor-pointer mb-1">Password</label>
+                <input type="password" name="password" id="password-input" autocomplete="current-password" autocapitalize="off" class="peer block bg-white w-full border rounded-md px-3 py-2" required />
+            </div>
+            @if(ViewBag.Errors != null)
+            {
+                <div class="bg-rose-200/40 text-rose-700 rounded-md p-3 my-3">
+                    @ViewBag.Errors
+                </div>
+            } 
+            <button type="submit" class="block bg-green-400 text-white rounded-md py-2">submit</button>
+        </form>
+    </div>
+</div>

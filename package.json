@@ -1,0 +1,22 @@
+{
+  "name": "papertrading",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "tailwind": "npx tailwindcss -i ./wwwroot/css/site.src.css -o ./wwwroot/css/site.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hossein-79/PaperTrading.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hossein-79/PaperTrading/issues"
+  },
+  "homepage": "https://github.com/Hossein-79/PaperTrading#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.0.19"
+  }
+}
