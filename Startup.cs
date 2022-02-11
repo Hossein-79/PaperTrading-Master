@@ -28,7 +28,8 @@ namespace PaperTrading
             {
                 var connectionString = Configuration.GetConnectionString("PaperContext");
 
-                options.UseSqlite(connectionString);
+                //options.UseSqlite(connectionString);
+                options.UseMySQL(connectionString);
 
             });
 
