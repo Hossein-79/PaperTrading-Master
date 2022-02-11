@@ -52,7 +52,6 @@ namespace PaperTrading.Services
                     var solveTradeBuy = await tradeService.GetCoinTradesBuy(coin.CoinId, coin.Price);
                     var solveTradeSell = await tradeService.GetCoinTradesSell(coin.CoinId, coin.Price);
 
-                    Console.WriteLine(coin.Price);
                     foreach (var trade in solveTradeBuy)
                     {
                         var usdtWallet = await walletService.GetUserWallet(trade.UserId, usdt.CoinId);

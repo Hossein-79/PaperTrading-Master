@@ -257,20 +257,19 @@ namespace PaperTrading.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> CancelTrade(int id)
+        public async Task<IActionResult> CancelTrade(int id, string symbol)
         {
             var user = await _userService.GetUser(User.Identity.Name);
 
             var trade = await _tradeService.GetTrade(id);
-            if (trade == null || trade.UserId != user.UserId)
+            if (trade != null && trade.UserId == user.UserId && trade.Status == TradeStatus.Open)
             {
-                return Json(false);
+                trade.Status = TradeStatus.Cancel;
+                await _tradeService.Update(trade);
+
             }
 
-            trade.Status = TradeStatus.Cancel;
-            await _tradeService.Update(trade);
-
-            return Json(true);
+            return RedirectToAction(nameof(Trade), new { id = symbol });
         }
 
         public async Task<IActionResult> Logout()

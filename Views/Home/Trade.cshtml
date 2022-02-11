@@ -16,7 +16,7 @@
             </div>
             <div class="text-right ml-auto">
                 <div class="">
-                    @if(hasLockedAmount)
+                    @if (hasLockedAmount)
                     {
                         <span>@((Model.Token.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Sell).Sum(u => u.Amount)).SplitNumber3Digits()) /</span>
                     }
@@ -24,7 +24,7 @@
                     <span>@(Model.Token.Symbol)</span>
                 </div>
                 <div class="text-gray-400">
-                    @if(hasLockedAmount)
+                    @if (hasLockedAmount)
                     {
                         <small class="text-xs">$@(((Model.Token.UserBalance - Model.OpenTrades.Where(u => u.Side == TradeSide.Sell).Sum(u => u.Amount)) * Model.Token.Price).SplitNumber3Digits()) /</small>
                     }
@@ -58,7 +58,7 @@
                     <input type="text" inputmode="decimal" id="price-input-mask" autocomplete="off" class="peer block bg-white w-full border rounded-md px-3 py-2" required />
                     <input type="hidden" asp-for="Trade.Price" id="price-input" required />
                 </div>
-                @if(ViewBag.Errors != null)
+                @if (ViewBag.Errors != null)
                 {
                     <div class="bg-rose-200/40 text-rose-700 rounded-md p-3 my-3">
                         @ViewBag.Errors
@@ -70,29 +70,82 @@
     </div>
     <div class="lg:col-start-6 lg:col-end-12">
         <div class="border border-gray-300 rounded-md">
+            <div class="flex text-center">
+                <div class="w-1/2">
+                    <input class="peer hidden" type="radio" name="orders-list-radio" id="orders-list-ongoing" value="order-list-open" checked>
+                    <label for="orders-list-ongoing" class="block transition-colors cursor-pointer peer-checked:cursor-default border-b-4 border-transparent peer-checked:border-blue-500 text-gray-500 peer-checked:text-black py-4">Orders</label>
+                </div>
+                <div class="w-1/2">
+                    <input class="peer hidden" type="radio" name="orders-list-radio" id="orders-list-history" value="order-list-history">
+                    <label for="orders-list-history" class="block transition-colors cursor-pointer peer-checked:cursor-default border-b-4 border-transparent peer-checked:border-blue-500 text-gray-500 peer-checked:text-black py-4">History</label>
+                </div>
+            </div>
             @* OPEN ORDERS *@
-            <div>
-                @foreach (var trade in Model.OpenTrades)
+            <div id="order-list-open" class="order-list-tab">
+                @if (Model.OpenTrades.Count() > 0)
                 {
-                    <div class="flex items-center border-t p-4">
-                        <svg role="img" class="h-6 w-6 flex-shrink-0 mr-4">
-                            <use xlink:href="/img/sprite.svg#coin-@(trade.Coin.Symbol)"></use>
-                        </svg>
-                        <div class="flex flex-col">
-                            <span>@(trade.Side.ToString()) @(trade.Coin.Symbol)</span>
-                            @* // CancelTrade/asp-route-id{tradeId} *@
-                            <a asp-action="CancelTrade" asp-route-id="@(trade.TradeId)" class="cancel-trade-btn text-xs text-red-600 hover:underline mt-1">Cancel Order</a>
-                        </div>
-                        <div class="text-right text-sm ml-auto">
-                            <div class="mb-1">
-                                <span class="text-gray-400">Amount:</span>
-                                <span>@(trade.Amount)</span>
+                    foreach (var trade in Model.OpenTrades)
+                    {
+                        <div class="flex items-center border-t p-4">
+                            <svg role="img" class="h-6 w-6 flex-shrink-0 mr-4">
+                                <use xlink:href="/img/sprite.svg#coin-@(trade.Coin.Symbol)"></use>
+                            </svg>
+                            <div class="flex flex-col">
+                                <span>@(trade.Side.ToString()) @(trade.Coin.Symbol)</span>
+                                @* // CancelTrade/asp-route-id{tradeId} *@
+                                <a asp-action="CancelTrade" asp-route-id="@(trade.TradeId)" asp-route-symbol="@(Model.Token.Symbol)" class="cancel-trade-btn text-xs text-red-600 hover:underline mt-1">Cancel Order</a>
                             </div>
-                            <div>
-                                <span class="text-gray-400">Price:</span>
-                                <span>@(trade.Price)</span>
+                            <div class="text-right text-sm ml-auto">
+                                <div class="mb-1">
+                                    <span class="text-gray-400">Amount:</span>
+                                    <span>@(trade.Amount)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">Price:</span>
+                                    <span>@(trade.Price)</span>
+                                </div>
                             </div>
                         </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-gray-400 text-center my-10">
+                        You don't have any orders!
+                    </div>
+                }
+            </div>
+            @* ORDER HISTORY *@
+            <div id="order-list-history" class="order-list-tab hidden">
+                @if (Model.SuccessTrade.Count() > 0)
+                {
+                    foreach (var trade in Model.SuccessTrade)
+                    {
+                        <div class="flex items-center border-t p-4">
+                            <svg role="img" class="h-6 w-6 flex-shrink-0 mr-4">
+                                <use xlink:href="/img/sprite.svg#coin-@(trade.Coin.Symbol)"></use>
+                            </svg>
+                            <div class="flex flex-col">
+                                <span>@(trade.Side.ToString()) @(trade.Coin.Symbol)</span>
+                                @* // CancelTrade/asp-route-id{tradeId} *@
+                            </div>
+                            <div class="text-right text-sm ml-auto">
+                                <div class="mb-1">
+                                    <span class="text-gray-400">Amount:</span>
+                                    <span>@(trade.Amount)</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-400">Price:</span>
+                                    <span>@(trade.Price)</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-gray-400 text-center my-10">
+                        You don't have any orders!
                     </div>
                 }
             </div>
@@ -103,7 +156,7 @@
 @section Scripts {
     <script src="/js/imask.min.js"></script>
     <script>
-        $(document).on('click', '[name="trade-side-radio"]', function() {
+        $(document).on('change', '[name="trade-side-radio"]', function() {
             var value = $(this).attr('value');
             $('#trade-side-input').val(value);
             $('#submit-btn-action').text(value);
@@ -150,28 +203,11 @@
                 $('#submit-btn-extra').text('');
             }
         }
+
+        $(document).on('change', '[name="orders-list-radio"]', function() {
+            var targetTab = '#' + $(this).attr('value');
+            $('.order-list-tab').addClass('hidden');
+            $(targetTab).removeClass('hidden');
+        });
     </script>
-}
-
-@if (ViewBag.Success != null)
-{
-    <h3>
-        Success
-    </h3>
-}
-
-@foreach (var trade in Model.OpenTrades)
-{
-    <div>
-        @(trade.Side.ToString()) - @(trade.Coin.Symbol) - @(trade.Price) - @(trade.Amount)
-    </div>
-}
-
-<div>-------------------------------------</div>
-
-@foreach (var trade in Model.SuccessTrade)
-{
-    <div>
-        @(trade.Side.ToString()) - @(trade.Coin.Symbol) - @(trade.Price) - @(trade.Amount)
-    </div>
 }
