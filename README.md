@@ -1,6 +1,6 @@
 # PaperTrading
 ##### Wanna start trading but lack experience and are afraid of losing your life's savings? Start paper-trading with free virtual money.
-[https://paper-trading.liara.run](https://paper-trading.liara.run)
+~[https://paper-trading.liara.run](https://paper-trading.liara.run)~ (Not available anymore)
 
 ### Mobile screenshots
 <div style="display:flex">
